@@ -12,26 +12,36 @@ class MainMode {
     private val keys: Map<Int, Dir> = mapOf(Keys.UP to Dir.UP, Keys.DOWN to Dir.DOWN, Keys.LEFT to Dir.LEFT, Keys.RIGHT to Dir.RIGHT)
     private val blocks = mutableListOf<Block>()
     private val grid: List<Cell> = (0..8).map { Cell(Pos(it % 3, (it / 3f).toInt())) }
-    private var state = State.GAME
-    private val blockInPlace: (Block) -> Boolean = { b: Block -> abs(b.actualPos.x - b.desiredX) < 1f && abs(b.actualPos.y - b.desiredY) < 1f }
+    private var state = GameState.GAME
+    private val blockInPlace: (Block) -> Boolean = { abs(it.actualPos.x - it.desiredX) < 1f && abs(it.actualPos.y - it.desiredY) < 1f }
+    private val blockAtSize: (Block) -> Boolean = { abs(it.actualW - Block.w) < 1f  }
 
     fun act(delta: Float) {
         when (state) {
-            State.GAME ->
+            GameState.GAME -> {
+                if (blocks.isEmpty()) {
+                    spawnBlock(grid, blocks)
+                    state = GameState.TRANSITION
+                }
                 keys.forEach {
                     if (Gdx.input.isKeyJustPressed(it.key))
                         actOnBlock(it.value)
                 }
-            State.TRANSITION -> {
+            }
+
+            GameState.TRANSITION -> {
                 blocks.forEach {
-                    it.actualPos.x -= (it.actualPos.x - it.desiredX) / 8f
-                    it.actualPos.y -= (it.actualPos.y - it.desiredY) / 8f
+                    it.actualPos.x -= (it.actualPos.x - it.desiredX) / 5f
+                    it.actualPos.y -= (it.actualPos.y - it.desiredY) / 5f
+                    it.actualW -= (it.actualW - Block.w) / 5f
                 }
-                if (blocks.all { blockInPlace.invoke(it) }) {
-                    state = State.GAME
+
+                if (blocks.all { blockInPlace.invoke(it) && blockAtSize(it) }) {
+                    state = GameState.GAME
                     blocks.forEach {
                         it.actualPos.x = it.desiredX
                         it.actualPos.y = it.desiredY
+                        it.actualW = Block.w
                     }
                 }
             }
@@ -39,11 +49,18 @@ class MainMode {
     }
 
     private fun actOnBlock(dir: Dir) {
-        if (moveBlocks(grid, blocks, dir))
-            state = State.TRANSITION
+        val blockMoved = moveBlocks(grid, blocks, dir)
+
         fuseBlocks(blocks)
-        if (blocks.size < grid.size)
+
+        val spawnedBlock = if (blockMoved && blocks.size < grid.size) {
             spawnBlock(grid, blocks)
+            true
+        } else
+            false
+
+        if (blockMoved || spawnedBlock)
+            state = GameState.TRANSITION
     }
 
     private fun fuseBlocks(blocks: MutableList<Block>) {
@@ -77,7 +94,7 @@ class MainMode {
         ScreenUtils.clear(0f, 0f, 0f, 1f)
         batch.begin()
         blocks.forEach {
-            batch.draw(it.template.texture, it.actualPos.x, it.actualPos.y, Block.w, Block.w)
+            batch.draw(it.template.texture, it.actualPos.x + (Block.w - it.actualW) / 2f, it.actualPos.y + (Block.w - it.actualW) / 2f, it.actualW, it.actualW)
         }
         batch.end()
     }
