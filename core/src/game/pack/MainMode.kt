@@ -5,22 +5,42 @@ import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.ScreenUtils
+import kotlin.math.abs
 
 class MainMode {
 
     private val keys: Map<Int, Dir> = mapOf(Keys.UP to Dir.UP, Keys.DOWN to Dir.DOWN, Keys.LEFT to Dir.LEFT, Keys.RIGHT to Dir.RIGHT)
     private val blocks = mutableListOf<Block>()
     private val grid: List<Cell> = (0..8).map { Cell(Pos(it % 3, (it / 3f).toInt())) }
+    private var state = State.GAME
+    private val blockInPlace: (Block) -> Boolean = { b: Block -> abs(b.actualPos.x - b.desiredX) < 1f && abs(b.actualPos.y - b.desiredY) < 1f }
 
     fun act(delta: Float) {
-        keys.forEach {
-            if (Gdx.input.isKeyJustPressed(it.key))
-                actOnBlock(it.value)
+        when (state) {
+            State.GAME ->
+                keys.forEach {
+                    if (Gdx.input.isKeyJustPressed(it.key))
+                        actOnBlock(it.value)
+                }
+            State.TRANSITION -> {
+                blocks.forEach {
+                    it.actualPos.x -= (it.actualPos.x - it.desiredX) / 8f
+                    it.actualPos.y -= (it.actualPos.y - it.desiredY) / 8f
+                }
+                if (blocks.all { blockInPlace.invoke(it) }) {
+                    state = State.GAME
+                    blocks.forEach {
+                        it.actualPos.x = it.desiredX
+                        it.actualPos.y = it.desiredY
+                    }
+                }
+            }
         }
     }
 
     private fun actOnBlock(dir: Dir) {
-        moveBlocks(grid, blocks, dir)
+        if (moveBlocks(grid, blocks, dir))
+            state = State.TRANSITION
         fuseBlocks(blocks)
         if (blocks.size < grid.size)
             spawnBlock(grid, blocks)
@@ -37,11 +57,12 @@ class MainMode {
             }
     }
 
-    private fun moveBlocks(grid: List<Cell>, blocks: MutableList<Block>, dir: Dir) {
-        var hasMoved: Boolean
-        do {
-            hasMoved = blocks.any { it.move(grid, blocks, dir) }
-        } while (hasMoved)
+    private fun moveBlocks(grid: List<Cell>, blocks: MutableList<Block>, dir: Dir): Boolean {
+        var hasMoved = false
+        while (blocks.any { it.move(grid, blocks, dir) }) {
+            hasMoved = true
+        }
+        return hasMoved
     }
 
     private fun spawnBlock(grid: List<Cell>, blocks: MutableList<Block>) {
@@ -61,8 +82,7 @@ class MainMode {
         batch.end()
     }
 
-    fun dispose() {
-    }
+    fun dispose() {}
 }
 
 private fun Block.lvlUp() {
@@ -80,12 +100,5 @@ private fun Block.move(grid: List<Cell>, blocks: MutableList<Block>, dir: Dir): 
     if (blocksAlreadyThere.size > sameLvlBlocks)
         return false
     cell = newCell
-    actualPos.set(newPos)
-    actualPos.scl(Block.w)
     return true
-}
-
-private fun Vector2.set(pos: Pos) {
-    x = pos.x.toFloat()
-    y = pos.y.toFloat()
 }

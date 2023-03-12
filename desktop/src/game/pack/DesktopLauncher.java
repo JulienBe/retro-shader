@@ -9,6 +9,7 @@ public class DesktopLauncher {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setForegroundFPS(60);
 		config.setTitle("Emrys game gdx");
+		config.setWindowedMode((int) (Block.w * 3), (int) (Block.w * 3));
 		new Lwjgl3Application(new Main(), config);
 	}
 }
