@@ -1,12 +1,8 @@
-#if defined(specularTextureFlag) || defined(emissiveTextureFlag)
+#if defined(emissiveTextureFlag)
 #define textureFlag
 #endif
 
-#if defined(specularTextureFlag) || defined(specularColorFlag)
-#define specularFlag
-#endif
-
-#if defined(specularFlag) || defined(fogFlag)
+#if defined(fogFlag)
 #define cameraPositionFlag
 #endif
 
@@ -31,11 +27,6 @@ attribute vec2 a_texCoord0;
 #ifdef emissiveTextureFlag
 uniform vec4 u_emissiveUVTransform;
 varying vec2 v_emissiveUV;
-#endif
-
-#ifdef specularTextureFlag
-uniform vec4 u_specularUVTransform;
-varying vec2 v_specularUV;
 #endif
 
 #ifdef boneWeight0Flag
@@ -137,10 +128,6 @@ uniform vec3 u_ambientCubemap[6];
 uniform vec3 u_sphericalHarmonics[9];
 #endif //sphericalHarmonicsFlag
 
-#ifdef specularFlag
-varying vec3 v_lightSpecular;
-#endif // specularFlag
-
 #ifdef cameraPositionFlag
 uniform vec4 u_cameraPosition;
 #endif // cameraPositionFlag
@@ -188,10 +175,6 @@ void main() {
     #ifdef emissiveTextureFlag
     v_emissiveUV = u_emissiveUVTransform.xy + a_texCoord0 * u_emissiveUVTransform.zw;
     #endif //emissiveTextureFlag
-
-    #ifdef specularTextureFlag
-    v_specularUV = u_specularUVTransform.xy + a_texCoord0 * u_specularUVTransform.zw;
-    #endif //specularTextureFlag
 
     #if defined(colorFlag)
     v_color = a_color;
@@ -299,22 +282,12 @@ void main() {
     v_lightDiffuse = vec3(0.0);
     #endif //ambientFlag
 
-
-    #ifdef specularFlag
-    v_lightSpecular = vec3(0.0);
-    vec3 viewVec = normalize(u_cameraPosition.xyz - pos.xyz);
-    #endif // specularFlag
-
     #if (numDirectionalLights > 0) && defined(normalFlag)
     for (int i = 0; i < numDirectionalLights; i++) {
         vec3 lightDir = -u_dirLights[i].direction;
         float NdotL = clamp(dot(normal, lightDir), 0.0, 1.0);
         vec3 value = u_dirLights[i].color * NdotL;
         v_lightDiffuse += value;
-        #ifdef specularFlag
-        float halfDotView = max(0.0, dot(normal, normalize(lightDir + viewVec)));
-        v_lightSpecular += value * pow(halfDotView, u_shininess);
-        #endif // specularFlag
     }
     #endif // numDirectionalLights
 
@@ -326,10 +299,6 @@ void main() {
         float NdotL = clamp(dot(normal, lightDir), 0.0, 1.0);
         vec3 value = u_pointLights[i].color * (NdotL / (1.0 + dist2));
         v_lightDiffuse += value;
-        #ifdef specularFlag
-        float halfDotView = max(0.0, dot(normal, normalize(lightDir + viewVec)));
-        v_lightSpecular += value * pow(halfDotView, u_shininess);
-        #endif // specularFlag
     }
     #endif // numPointLights
     #endif // lightingFlag
