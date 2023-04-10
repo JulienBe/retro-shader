@@ -19,6 +19,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable
 import com.badlogic.gdx.graphics.g3d.Shader
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight
+import com.badlogic.gdx.graphics.g3d.shaders.BaseShader
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController
 import com.badlogic.gdx.graphics.g3d.utils.DefaultTextureBinder
@@ -41,7 +42,7 @@ class GameLoop : ApplicationAdapter() {
     lateinit var fbo: FrameBuffer
     lateinit var batch: SpriteBatch
     lateinit var renderable: Renderable
-    lateinit var shader: Shader
+    lateinit var shader: BaseShader
     lateinit var renderContext: RenderContext //Here we removed the ModelBatch and added a RenderContext and Shader. A RenderContext keeps tracks of the OpenGL state to eliminate state switching between shader switches. For example, if a Texture is already bound, it doesn’t need to be bound again
 
     override fun create() {
