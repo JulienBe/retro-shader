@@ -1,11 +1,11 @@
 uniform vec4 u_diffuseColor;
 uniform sampler2D u_shadowTexture;
 uniform float u_shadowPCFOffset;
-varying vec3 v_shadowMapUv;
+uniform sampler2D u_palette;
 
+varying vec3 v_shadowMapUv;
 varying vec3 v_ambientLight;
 varying vec3 v_lightDiffuse;
-
 
 float getShadowness(vec2 offset)
 {
@@ -33,7 +33,13 @@ void main() {
         int(182 > color) + int(214 > color) + int(228 > color) + int(249 > color) +
         int(253 > color) + int(255 > color) + int(374 > color) + int(389 > color) +
         int(418 > color) + int(459 > color) + int(491 > color) + int(496 > color);
+    // no colored light for the moment, .r is enough
+    vec4 awesome_paletted_color = texture2D(u_palette, vec2(1.0 - v_lightDiffuse.r, palette_index / 15.0));
+    awesome_paletted_color.r *= max(1.0 + ((r * 2.0) - (g + b)), 1.0);
+    awesome_paletted_color.g *= max(1.0 + ((g * 2.0) - (r + b)), 1.0);
+    awesome_paletted_color.b *= max(1.0 + ((b * 2.0) - (r + g)), 1.0);
+    gl_FragColor = vec4(awesome_paletted_color.rgb, 1.0);
 
-    gl_FragColor.rgb = diffuse.rgb * (v_lightDiffuse);
-    gl_FragColor.a = 1.0;
+//    gl_FragColor.rgb = diffuse.rgb * (v_lightDiffuse);
+//    gl_FragColor.a = 1.0;
 }

@@ -26,7 +26,7 @@ class Cubeticle(environment: Environment) {
 
     private val model = modelBuilder.createBox(
         1f, 1f, 1f,
-        Material(ColorAttribute.createDiffuse(Palette.rand().color)),
+        Material(ColorAttribute.createDiffuse(PaletteColor.rand().color)),
         (VertexAttributes.Usage.Position or VertexAttributes.Usage.Normal).toLong()
     )
     private val instance = ModelInstance(model)
