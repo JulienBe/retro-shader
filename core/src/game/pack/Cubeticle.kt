@@ -9,13 +9,13 @@ import com.badlogic.gdx.graphics.g3d.Renderable
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder
 import com.badlogic.gdx.utils.Array
-import kotlin.random.Random
 
 class Cubeticle(environment: Environment) {
 
     companion object {
         private val modelBuilder = ModelBuilder()
         private val cubeticles = Array<Cubeticle>()
+        private var row = 0f
 
         fun draw(modelBatch: ModelBatch) {
             cubeticles.forEach {
@@ -26,7 +26,7 @@ class Cubeticle(environment: Environment) {
 
     private val model = modelBuilder.createBox(
         1f, 1f, 1f,
-        Material(ColorAttribute.createDiffuse(PaletteColor.rand().color)),
+        Material(ColorAttribute.createDiffuse(PaletteColor.next().color)),
         (VertexAttributes.Usage.Position or VertexAttributes.Usage.Normal).toLong()
     )
     private val instance = ModelInstance(model)
@@ -41,6 +41,7 @@ class Cubeticle(environment: Environment) {
 
     fun add() {
         cubeticles.add(this)
-        renderable.worldTransform.translate(Random.nextFloat() * 10, Random.nextFloat() * 10, Random.nextFloat() * 10)
+        renderable.worldTransform.translate(row, row, row)
+        row += 2f
     }
 }

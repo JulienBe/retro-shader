@@ -17,7 +17,6 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 
-
 class GameLoop : ApplicationAdapter() {
 
     lateinit var viewport: Viewport
@@ -36,7 +35,7 @@ class GameLoop : ApplicationAdapter() {
         environment.set(ColorAttribute(ColorAttribute.AmbientLight, 0.3f, 0.3f, 0.3f, 1f))
         environment.add(DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f))
 
-        modelBatch = ModelBatch(Gdx.files.internal("shaders/my_vert.glsl").readString(), Gdx.files.internal("shaders/my_frag.glsl").readString())
+        modelBatch = ModelBatch(MyShaderProvider("shaders/my_vert.glsl", "shaders/my_frag.glsl"))
 
         cam = PerspectiveCamera(67f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
         cam.position.set(10f, 10f, 10f)
@@ -58,14 +57,12 @@ class GameLoop : ApplicationAdapter() {
 
     override fun render() {
         if (Gdx.input.justTouched()) {
-            Cubeticle(environment).add()
+            for (i in 0..PaletteColor.values().size)
+                Cubeticle(environment).add()
         }
         fbo {
             Gdx.gl.glViewport(0, 0, Gdx.graphics.width / 10, Gdx.graphics.height / 10)
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT or GL20.GL_DEPTH_BUFFER_BIT)
-            Gdx.graphics.gL20.glActiveTexture(GL20.GL_TEXTURE1)
-            palette.palettes[0].bind()
-
 
             camController.update()
 

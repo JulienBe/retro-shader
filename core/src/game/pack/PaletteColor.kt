@@ -35,6 +35,11 @@ enum class PaletteColor(red: Int, green: Int, blue: Int) {
     }
 
     companion object {
+        private var index = 0
+        fun next(): PaletteColor {
+            index++
+            return values()[index % values().size]
+        }
         fun rand(): PaletteColor {
             return values().random()
         }

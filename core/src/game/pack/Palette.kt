@@ -8,12 +8,12 @@ import ktx.assets.load
 class Palette {
 
     val palettes = arrayListOf(
-        getTexture("img/palette_improved"),
-        getTexture("img/palette"),
-        getTexture("img/palette_c64"),
-        getTexture("img/palette_gbc"),
-        getTexture("img/palette_gameboy"),
-        getTexture("img/palette_pico8")
+        getTexture("palettes/palette_improved"),
+        getTexture("palettes/palette"),
+        getTexture("palettes/palette_c64"),
+        getTexture("palettes/palette_gbc"),
+        getTexture("palettes/palette_gameboy"),
+        getTexture("palettes/palette_pico8")
     )
 
     private fun getTexture(path: String): Texture {
